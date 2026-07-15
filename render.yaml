@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: apple-and-oak
+    runtime: node
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: VITE_GOOGLE_CLIENT_ID
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+    healthCheckPath: /api/trpc/ping
