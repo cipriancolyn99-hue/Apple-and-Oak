@@ -1,0 +1,12 @@
+appleandoak-clean/
+├── api/
+├── contracts/
+├── db/
+├── public/
+├── src/
+├── index.html
+├── package.json
+├── vite.config.ts
+├── .env
+├── railway.toml
+└── ... (other config files)
