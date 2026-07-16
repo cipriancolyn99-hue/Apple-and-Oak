@@ -85,4 +85,20 @@ export const contentRouter = createRouter({
       memoryDB.siteFiles = memoryDB.siteFiles.filter((f) => f.id !== input.id);
       return { success: true };
     }),
+
+  // Alias for frontend compatibility
+  removeAnnouncement: staffQuery
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input }) => {
+      memoryDB.announcements = memoryDB.announcements.filter((a) => a.id !== input.id);
+      return { success: true };
+    }),
+
+  // Alias for frontend compatibility
+  removeFile: staffQuery
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input }) => {
+      memoryDB.siteFiles = memoryDB.siteFiles.filter((f) => f.id !== input.id);
+      return { success: true };
+    }),
 });
