@@ -55,6 +55,59 @@ export const workerRouter = createRouter({
       return { success: true };
     }),
 
+  // Toggle live status
+  toggleLive: publicQuery
+    .input(z.object({ email: z.string() }))
+    .mutation(async ({ input }) => {
+      const worker = memoryDB.workers.find((w) => w.email.toLowerCase() === input.email.toLowerCase());
+      if (worker) {
+        worker.isOnline = !worker.isOnline;
+      }
+      return { success: true, isOnline: worker?.isOnline ?? false };
+    }),
+
+  // Update profile
+  updateProfile: publicQuery
+    .input(z.object({ email: z.string(), title: z.string().optional(), bio: z.string().optional(), specialties: z.array(z.string()).optional() }))
+    .mutation(async ({ input }) => {
+      const worker = memoryDB.workers.find((w) => w.email.toLowerCase() === input.email.toLowerCase());
+      if (worker) {
+        if (input.title) worker.title = input.title;
+        if (input.bio) worker.bio = input.bio;
+        if (input.specialties) worker.specialties = input.specialties;
+      }
+      return { success: true };
+    }),
+
+  // Add worker
+  add: publicQuery
+    .input(z.object({ name: z.string(), email: z.string(), password: z.string(), role: z.string(), avatar: z.string() }))
+    .mutation(async ({ input }) => {
+      const hashed = input.password.startsWith("plain:") ? input.password : "plain:" + input.password;
+      const worker = {
+        id: memoryDB.workers.length + 1,
+        name: input.name,
+        email: input.email,
+        password: hashed,
+        role: input.role,
+        avatar: input.avatar,
+        isOnline: false,
+        title: input.role,
+        bio: "",
+        specialties: [],
+      };
+      memoryDB.workers.push(worker);
+      return { success: true, worker: { id: worker.id, name: worker.name, email: worker.email, role: worker.role } };
+    }),
+
+  // Remove worker
+  remove: publicQuery
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input }) => {
+      memoryDB.workers = memoryDB.workers.filter((w) => w.id !== input.id);
+      return { success: true };
+    }),
+
   // Subscribe (dummy - returns current data)
   subscribe: publicQuery.query(async () => {
     return { workers: memoryDB.workers, timestamp: Date.now() };
