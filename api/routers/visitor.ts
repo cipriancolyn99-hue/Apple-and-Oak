@@ -70,4 +70,26 @@ export const visitorRouter = createRouter({
       if (v) v.isOnline = false;
       return { success: true, count: getOnlineCount() };
     }),
+
+  // Join a chat room
+  joinRoom: publicQuery
+    .input(z.object({ sessionId: z.string(), room: z.enum(["mothers", "fathers", "public"]) }))
+    .mutation(async ({ input }) => {
+      const v = memoryDB.visitors.find((v) => v.sessionId === input.sessionId);
+      if (v) {
+        v.currentRoom = input.room;
+      }
+      return { success: true, count: getOnlineCount() };
+    }),
+
+  // Update visitor name
+  updateName: publicQuery
+    .input(z.object({ sessionId: z.string(), userName: z.string() }))
+    .mutation(async ({ input }) => {
+      const v = memoryDB.visitors.find((v) => v.sessionId === input.sessionId);
+      if (v) {
+        v.userName = input.userName;
+      }
+      return { success: true };
+    }),
 });
