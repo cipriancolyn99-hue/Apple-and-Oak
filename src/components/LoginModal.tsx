@@ -91,7 +91,18 @@ export function LoginModal() {
         <div className="bg-violet-600 text-white px-3 py-2 rounded-lg flex items-center gap-2 shadow-lg">
           <span className="font-semibold text-sm">{currentUser.name}</span>
         </div>
-        <button onClick={() => { setUser(null); setAuthToken(null); }} className="bg-white/10 hover:bg-white/20 text-white px-3 py-2 rounded-lg text-sm">Logout</button>
+        <button onClick={async () => {
+          const token = localStorage.getItem("auth_token");
+          if (token) {
+            await fetch("/api/trpc/worker.logout", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ json: { email: currentUser.email, token } }),
+            }).catch(() => {});
+          }
+          setUser(null);
+          setAuthToken(null);
+        }} className="bg-white/10 hover:bg-white/20 text-white px-3 py-2 rounded-lg text-sm">Logout</button>
       </div>
     );
   }
