@@ -18532,7 +18532,7 @@ __export(dist_exports, {
 import { createServer as createServerHTTP } from "http";
 import { Http2ServerRequest as Http2ServerRequest2, constants as h2constants } from "http2";
 import { Http2ServerRequest } from "http2";
-import { Readable } from "stream";
+import { Readable as Readable2 } from "stream";
 import crypto2 from "crypto";
 async function readWithoutBlocking(readPromise) {
   return Promise.race([readPromise, Promise.resolve().then(() => Promise.resolve(void 0))]);
@@ -18649,7 +18649,7 @@ var init_dist2 = __esm({
           init.body = new ReadableStream({
             async pull(controller) {
               try {
-                reader ||= Readable.toWeb(incoming).getReader();
+                reader ||= Readable2.toWeb(incoming).getReader();
                 const { done, value } = await reader.read();
                 if (done) {
                   controller.close();
@@ -18662,7 +18662,7 @@ var init_dist2 = __esm({
             }
           });
         } else {
-          init.body = Readable.toWeb(incoming);
+          init.body = Readable2.toWeb(incoming);
         }
       }
       return new Request3(url2, init);
@@ -19171,261 +19171,6 @@ var init_dist2 = __esm({
       });
       return server;
     };
-  }
-});
-
-// node_modules/hono/dist/utils/mime.js
-var getMimeType, _baseMimes, baseMimes;
-var init_mime = __esm({
-  "node_modules/hono/dist/utils/mime.js"() {
-    getMimeType = (filename, mimes = baseMimes) => {
-      const regexp = /\.([a-zA-Z0-9]+?)$/;
-      const match2 = filename.match(regexp);
-      if (!match2) {
-        return;
-      }
-      return mimes[match2[1].toLowerCase()];
-    };
-    _baseMimes = {
-      aac: "audio/aac",
-      avi: "video/x-msvideo",
-      avif: "image/avif",
-      av1: "video/av1",
-      bin: "application/octet-stream",
-      bmp: "image/bmp",
-      css: "text/css; charset=utf-8",
-      csv: "text/csv; charset=utf-8",
-      eot: "application/vnd.ms-fontobject",
-      epub: "application/epub+zip",
-      gif: "image/gif",
-      gz: "application/gzip",
-      htm: "text/html; charset=utf-8",
-      html: "text/html; charset=utf-8",
-      ico: "image/x-icon",
-      ics: "text/calendar; charset=utf-8",
-      jpeg: "image/jpeg",
-      jpg: "image/jpeg",
-      js: "text/javascript; charset=utf-8",
-      json: "application/json",
-      jsonld: "application/ld+json",
-      map: "application/json",
-      mid: "audio/x-midi",
-      midi: "audio/x-midi",
-      mjs: "text/javascript; charset=utf-8",
-      mp3: "audio/mpeg",
-      mp4: "video/mp4",
-      mpeg: "video/mpeg",
-      oga: "audio/ogg",
-      ogv: "video/ogg",
-      ogx: "application/ogg",
-      opus: "audio/opus",
-      otf: "font/otf",
-      pdf: "application/pdf",
-      png: "image/png",
-      rtf: "application/rtf",
-      svg: "image/svg+xml; charset=utf-8",
-      tif: "image/tiff",
-      tiff: "image/tiff",
-      ts: "video/mp2t",
-      ttf: "font/ttf",
-      txt: "text/plain; charset=utf-8",
-      wasm: "application/wasm",
-      webm: "video/webm",
-      weba: "audio/webm",
-      webmanifest: "application/manifest+json",
-      webp: "image/webp",
-      woff: "font/woff",
-      woff2: "font/woff2",
-      xhtml: "application/xhtml+xml; charset=utf-8",
-      xml: "application/xml; charset=utf-8",
-      zip: "application/zip",
-      "3gp": "video/3gpp",
-      "3g2": "video/3gpp2",
-      gltf: "model/gltf+json",
-      glb: "model/gltf-binary"
-    };
-    baseMimes = _baseMimes;
-  }
-});
-
-// node_modules/@hono/node-server/dist/serve-static.mjs
-import { createReadStream as createReadStream2, statSync as statSync2, existsSync } from "fs";
-import { join } from "path";
-import { versions } from "process";
-import { Readable as Readable2 } from "stream";
-var COMPRESSIBLE_CONTENT_TYPE_REGEX, ENCODINGS, ENCODINGS_ORDERED_KEYS, pr54206Applied, useReadableToWeb, createStreamBody, getStats, tryDecode2, tryDecodeURI2, serveStatic;
-var init_serve_static = __esm({
-  "node_modules/@hono/node-server/dist/serve-static.mjs"() {
-    init_mime();
-    COMPRESSIBLE_CONTENT_TYPE_REGEX = /^\s*(?:text\/[^;\s]+|application\/(?:javascript|json|xml|xml-dtd|ecmascript|dart|postscript|rtf|tar|toml|vnd\.dart|vnd\.ms-fontobject|vnd\.ms-opentype|wasm|x-httpd-php|x-javascript|x-ns-proxy-autoconfig|x-sh|x-tar|x-virtualbox-hdd|x-virtualbox-ova|x-virtualbox-ovf|x-virtualbox-vbox|x-virtualbox-vdi|x-virtualbox-vhd|x-virtualbox-vmdk|x-www-form-urlencoded)|font\/(?:otf|ttf)|image\/(?:bmp|vnd\.adobe\.photoshop|vnd\.microsoft\.icon|vnd\.ms-dds|x-icon|x-ms-bmp)|message\/rfc822|model\/gltf-binary|x-shader\/x-fragment|x-shader\/x-vertex|[^;\s]+?\+(?:json|text|xml|yaml))(?:[;\s]|$)/i;
-    ENCODINGS = {
-      br: ".br",
-      zstd: ".zst",
-      gzip: ".gz"
-    };
-    ENCODINGS_ORDERED_KEYS = Object.keys(ENCODINGS);
-    pr54206Applied = () => {
-      const [major, minor] = versions.node.split(".").map((component) => parseInt(component));
-      return major >= 23 || major === 22 && minor >= 7 || major === 20 && minor >= 18;
-    };
-    useReadableToWeb = pr54206Applied();
-    createStreamBody = (stream) => {
-      if (useReadableToWeb) {
-        return Readable2.toWeb(stream);
-      }
-      const body = new ReadableStream({
-        start(controller) {
-          stream.on("data", (chunk) => {
-            controller.enqueue(chunk);
-          });
-          stream.on("error", (err) => {
-            controller.error(err);
-          });
-          stream.on("end", () => {
-            controller.close();
-          });
-        },
-        cancel() {
-          stream.destroy();
-        }
-      });
-      return body;
-    };
-    getStats = (path2) => {
-      let stats;
-      try {
-        stats = statSync2(path2);
-      } catch {
-      }
-      return stats;
-    };
-    tryDecode2 = (str, decoder) => {
-      try {
-        return decoder(str);
-      } catch {
-        return str.replace(/(?:%[0-9A-Fa-f]{2})+/g, (match2) => {
-          try {
-            return decoder(match2);
-          } catch {
-            return match2;
-          }
-        });
-      }
-    };
-    tryDecodeURI2 = (str) => tryDecode2(str, decodeURI);
-    serveStatic = (options = { root: "" }) => {
-      const root = options.root || "";
-      const optionPath = options.path;
-      if (root !== "" && !existsSync(root)) {
-        console.error(`serveStatic: root path '${root}' is not found, are you sure it's correct?`);
-      }
-      return async (c, next) => {
-        if (c.finalized) {
-          return next();
-        }
-        let filename;
-        if (optionPath) {
-          filename = optionPath;
-        } else {
-          try {
-            filename = tryDecodeURI2(c.req.path);
-            if (/(?:^|[\/\\])\.{1,2}(?:$|[\/\\])|[\/\\]{2,}/.test(filename)) {
-              throw new Error();
-            }
-          } catch {
-            await options.onNotFound?.(c.req.path, c);
-            return next();
-          }
-        }
-        let path2 = join(
-          root,
-          !optionPath && options.rewriteRequestPath ? options.rewriteRequestPath(filename, c) : filename
-        );
-        let stats = getStats(path2);
-        if (stats && stats.isDirectory()) {
-          const indexFile = options.index ?? "index.html";
-          path2 = join(path2, indexFile);
-          stats = getStats(path2);
-        }
-        if (!stats) {
-          await options.onNotFound?.(path2, c);
-          return next();
-        }
-        const mimeType = getMimeType(path2);
-        c.header("Content-Type", mimeType || "application/octet-stream");
-        if (options.precompressed && (!mimeType || COMPRESSIBLE_CONTENT_TYPE_REGEX.test(mimeType))) {
-          const acceptEncodingSet = new Set(
-            c.req.header("Accept-Encoding")?.split(",").map((encoding) => encoding.trim())
-          );
-          for (const encoding of ENCODINGS_ORDERED_KEYS) {
-            if (!acceptEncodingSet.has(encoding)) {
-              continue;
-            }
-            const precompressedStats = getStats(path2 + ENCODINGS[encoding]);
-            if (precompressedStats) {
-              c.header("Content-Encoding", encoding);
-              c.header("Vary", "Accept-Encoding", { append: true });
-              stats = precompressedStats;
-              path2 = path2 + ENCODINGS[encoding];
-              break;
-            }
-          }
-        }
-        let result;
-        const size = stats.size;
-        const range = c.req.header("range") || "";
-        if (c.req.method == "HEAD" || c.req.method == "OPTIONS") {
-          c.header("Content-Length", size.toString());
-          c.status(200);
-          result = c.body(null);
-        } else if (!range) {
-          c.header("Content-Length", size.toString());
-          result = c.body(createStreamBody(createReadStream2(path2)), 200);
-        } else {
-          c.header("Accept-Ranges", "bytes");
-          c.header("Date", stats.birthtime.toUTCString());
-          const parts = range.replace(/bytes=/, "").split("-", 2);
-          const start = parseInt(parts[0], 10) || 0;
-          let end = parseInt(parts[1], 10) || size - 1;
-          if (size < end - start + 1) {
-            end = size - 1;
-          }
-          const chunksize = end - start + 1;
-          const stream = createReadStream2(path2, { start, end });
-          c.header("Content-Length", chunksize.toString());
-          c.header("Content-Range", `bytes ${start}-${end}/${stats.size}`);
-          result = c.body(createStreamBody(stream), 206);
-        }
-        await options.onFound?.(path2, c);
-        return result;
-      };
-    };
-  }
-});
-
-// api/lib/vite.ts
-var vite_exports = {};
-__export(vite_exports, {
-  serveStaticFiles: () => serveStaticFiles
-});
-import fs2 from "fs";
-import path from "path";
-function serveStaticFiles(app2) {
-  const distPath = path.resolve(import.meta.dirname, "../dist/public");
-  app2.use("*", serveStatic({ root: "./dist/public" }));
-  app2.notFound((c) => {
-    const accept = c.req.header("accept") ?? "";
-    if (!accept.includes("text/html")) {
-      return c.json({ error: "Not Found" }, 404);
-    }
-    const indexPath = path.resolve(distPath, "index.html");
-    const content = fs2.readFileSync(indexPath, "utf-8");
-    return c.html(content);
-  });
-}
-var init_vite = __esm({
-  "api/lib/vite.ts"() {
-    init_serve_static();
   }
 });
 
@@ -39961,7 +39706,227 @@ async function createContext(opts) {
   return { req: opts.req, resHeaders: opts.resHeaders };
 }
 
+// node_modules/hono/dist/utils/mime.js
+var getMimeType = (filename, mimes = baseMimes) => {
+  const regexp = /\.([a-zA-Z0-9]+?)$/;
+  const match2 = filename.match(regexp);
+  if (!match2) {
+    return;
+  }
+  return mimes[match2[1].toLowerCase()];
+};
+var _baseMimes = {
+  aac: "audio/aac",
+  avi: "video/x-msvideo",
+  avif: "image/avif",
+  av1: "video/av1",
+  bin: "application/octet-stream",
+  bmp: "image/bmp",
+  css: "text/css; charset=utf-8",
+  csv: "text/csv; charset=utf-8",
+  eot: "application/vnd.ms-fontobject",
+  epub: "application/epub+zip",
+  gif: "image/gif",
+  gz: "application/gzip",
+  htm: "text/html; charset=utf-8",
+  html: "text/html; charset=utf-8",
+  ico: "image/x-icon",
+  ics: "text/calendar; charset=utf-8",
+  jpeg: "image/jpeg",
+  jpg: "image/jpeg",
+  js: "text/javascript; charset=utf-8",
+  json: "application/json",
+  jsonld: "application/ld+json",
+  map: "application/json",
+  mid: "audio/x-midi",
+  midi: "audio/x-midi",
+  mjs: "text/javascript; charset=utf-8",
+  mp3: "audio/mpeg",
+  mp4: "video/mp4",
+  mpeg: "video/mpeg",
+  oga: "audio/ogg",
+  ogv: "video/ogg",
+  ogx: "application/ogg",
+  opus: "audio/opus",
+  otf: "font/otf",
+  pdf: "application/pdf",
+  png: "image/png",
+  rtf: "application/rtf",
+  svg: "image/svg+xml; charset=utf-8",
+  tif: "image/tiff",
+  tiff: "image/tiff",
+  ts: "video/mp2t",
+  ttf: "font/ttf",
+  txt: "text/plain; charset=utf-8",
+  wasm: "application/wasm",
+  webm: "video/webm",
+  weba: "audio/webm",
+  webmanifest: "application/manifest+json",
+  webp: "image/webp",
+  woff: "font/woff",
+  woff2: "font/woff2",
+  xhtml: "application/xhtml+xml; charset=utf-8",
+  xml: "application/xml; charset=utf-8",
+  zip: "application/zip",
+  "3gp": "video/3gpp",
+  "3g2": "video/3gpp2",
+  gltf: "model/gltf+json",
+  glb: "model/gltf-binary"
+};
+var baseMimes = _baseMimes;
+
+// node_modules/@hono/node-server/dist/serve-static.mjs
+import { createReadStream as createReadStream2, statSync as statSync2, existsSync } from "fs";
+import { join } from "path";
+import { versions } from "process";
+import { Readable } from "stream";
+var COMPRESSIBLE_CONTENT_TYPE_REGEX = /^\s*(?:text\/[^;\s]+|application\/(?:javascript|json|xml|xml-dtd|ecmascript|dart|postscript|rtf|tar|toml|vnd\.dart|vnd\.ms-fontobject|vnd\.ms-opentype|wasm|x-httpd-php|x-javascript|x-ns-proxy-autoconfig|x-sh|x-tar|x-virtualbox-hdd|x-virtualbox-ova|x-virtualbox-ovf|x-virtualbox-vbox|x-virtualbox-vdi|x-virtualbox-vhd|x-virtualbox-vmdk|x-www-form-urlencoded)|font\/(?:otf|ttf)|image\/(?:bmp|vnd\.adobe\.photoshop|vnd\.microsoft\.icon|vnd\.ms-dds|x-icon|x-ms-bmp)|message\/rfc822|model\/gltf-binary|x-shader\/x-fragment|x-shader\/x-vertex|[^;\s]+?\+(?:json|text|xml|yaml))(?:[;\s]|$)/i;
+var ENCODINGS = {
+  br: ".br",
+  zstd: ".zst",
+  gzip: ".gz"
+};
+var ENCODINGS_ORDERED_KEYS = Object.keys(ENCODINGS);
+var pr54206Applied = () => {
+  const [major, minor] = versions.node.split(".").map((component) => parseInt(component));
+  return major >= 23 || major === 22 && minor >= 7 || major === 20 && minor >= 18;
+};
+var useReadableToWeb = pr54206Applied();
+var createStreamBody = (stream) => {
+  if (useReadableToWeb) {
+    return Readable.toWeb(stream);
+  }
+  const body = new ReadableStream({
+    start(controller) {
+      stream.on("data", (chunk) => {
+        controller.enqueue(chunk);
+      });
+      stream.on("error", (err) => {
+        controller.error(err);
+      });
+      stream.on("end", () => {
+        controller.close();
+      });
+    },
+    cancel() {
+      stream.destroy();
+    }
+  });
+  return body;
+};
+var getStats = (path2) => {
+  let stats;
+  try {
+    stats = statSync2(path2);
+  } catch {
+  }
+  return stats;
+};
+var tryDecode2 = (str, decoder) => {
+  try {
+    return decoder(str);
+  } catch {
+    return str.replace(/(?:%[0-9A-Fa-f]{2})+/g, (match2) => {
+      try {
+        return decoder(match2);
+      } catch {
+        return match2;
+      }
+    });
+  }
+};
+var tryDecodeURI2 = (str) => tryDecode2(str, decodeURI);
+var serveStatic = (options = { root: "" }) => {
+  const root = options.root || "";
+  const optionPath = options.path;
+  if (root !== "" && !existsSync(root)) {
+    console.error(`serveStatic: root path '${root}' is not found, are you sure it's correct?`);
+  }
+  return async (c, next) => {
+    if (c.finalized) {
+      return next();
+    }
+    let filename;
+    if (optionPath) {
+      filename = optionPath;
+    } else {
+      try {
+        filename = tryDecodeURI2(c.req.path);
+        if (/(?:^|[\/\\])\.{1,2}(?:$|[\/\\])|[\/\\]{2,}/.test(filename)) {
+          throw new Error();
+        }
+      } catch {
+        await options.onNotFound?.(c.req.path, c);
+        return next();
+      }
+    }
+    let path2 = join(
+      root,
+      !optionPath && options.rewriteRequestPath ? options.rewriteRequestPath(filename, c) : filename
+    );
+    let stats = getStats(path2);
+    if (stats && stats.isDirectory()) {
+      const indexFile = options.index ?? "index.html";
+      path2 = join(path2, indexFile);
+      stats = getStats(path2);
+    }
+    if (!stats) {
+      await options.onNotFound?.(path2, c);
+      return next();
+    }
+    const mimeType = getMimeType(path2);
+    c.header("Content-Type", mimeType || "application/octet-stream");
+    if (options.precompressed && (!mimeType || COMPRESSIBLE_CONTENT_TYPE_REGEX.test(mimeType))) {
+      const acceptEncodingSet = new Set(
+        c.req.header("Accept-Encoding")?.split(",").map((encoding) => encoding.trim())
+      );
+      for (const encoding of ENCODINGS_ORDERED_KEYS) {
+        if (!acceptEncodingSet.has(encoding)) {
+          continue;
+        }
+        const precompressedStats = getStats(path2 + ENCODINGS[encoding]);
+        if (precompressedStats) {
+          c.header("Content-Encoding", encoding);
+          c.header("Vary", "Accept-Encoding", { append: true });
+          stats = precompressedStats;
+          path2 = path2 + ENCODINGS[encoding];
+          break;
+        }
+      }
+    }
+    let result;
+    const size = stats.size;
+    const range = c.req.header("range") || "";
+    if (c.req.method == "HEAD" || c.req.method == "OPTIONS") {
+      c.header("Content-Length", size.toString());
+      c.status(200);
+      result = c.body(null);
+    } else if (!range) {
+      c.header("Content-Length", size.toString());
+      result = c.body(createStreamBody(createReadStream2(path2)), 200);
+    } else {
+      c.header("Accept-Ranges", "bytes");
+      c.header("Date", stats.birthtime.toUTCString());
+      const parts = range.replace(/bytes=/, "").split("-", 2);
+      const start = parseInt(parts[0], 10) || 0;
+      let end = parseInt(parts[1], 10) || size - 1;
+      if (size < end - start + 1) {
+        end = size - 1;
+      }
+      const chunksize = end - start + 1;
+      const stream = createReadStream2(path2, { start, end });
+      c.header("Content-Length", chunksize.toString());
+      c.header("Content-Range", `bytes ${start}-${end}/${stats.size}`);
+      result = c.body(createStreamBody(stream), 206);
+    }
+    await options.onFound?.(path2, c);
+    return result;
+  };
+};
+
 // api/boot.ts
+import fs2 from "fs";
+import path from "path";
 var app = new Hono2();
 app.use(bodyLimit({ maxSize: 50 * 1024 * 1024 }));
 app.use("/api/trpc/*", async (c) => {
@@ -39974,11 +39939,28 @@ app.use("/api/trpc/*", async (c) => {
 });
 app.get("/ping", (c) => c.json({ ok: true }));
 app.all("/api/*", (c) => c.json({ error: "Not Found" }, 404));
+var publicPath = path.resolve(process.cwd(), "dist/public");
+console.log("Static files path:", publicPath);
+console.log("Exists:", fs2.existsSync(publicPath));
+if (fs2.existsSync(publicPath)) {
+  console.log("Files:", fs2.readdirSync(publicPath).join(", "));
+}
+app.use("/assets/*", serveStatic({ root: "./dist/public" }));
+app.use("/*", serveStatic({ root: "./dist/public" }));
+app.notFound((c) => {
+  const accept = c.req.header("accept") ?? "";
+  if (!accept.includes("text/html")) {
+    return c.json({ error: "Not Found" }, 404);
+  }
+  const indexPath = path.resolve(publicPath, "index.html");
+  if (fs2.existsSync(indexPath)) {
+    return c.html(fs2.readFileSync(indexPath, "utf-8"));
+  }
+  return c.json({ error: "index.html not found" }, 500);
+});
 var boot_default = app;
 if (process.env.NODE_ENV === "production") {
   const { serve: serve2 } = await Promise.resolve().then(() => (init_dist2(), dist_exports));
-  const { serveStaticFiles: serveStaticFiles2 } = await Promise.resolve().then(() => (init_vite(), vite_exports));
-  serveStaticFiles2(app);
   const port = parseInt(process.env.PORT || "3000");
   serve2({ fetch: app.fetch, port }, () => {
     console.log(`Server running on port ${port}`);
